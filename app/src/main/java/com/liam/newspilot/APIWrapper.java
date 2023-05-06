@@ -3,6 +3,8 @@ package com.liam.newspilot;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -48,6 +50,7 @@ public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
             }
 
             jsonResult = convertInputStreamToString(inputStream);
+
             //create deserializer
             Gson gson = new Gson();
             result = gson.fromJson(jsonResult, Result.class);
@@ -90,6 +93,7 @@ public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
         }
         return sb.toString();
     }
+
 
 
 }
