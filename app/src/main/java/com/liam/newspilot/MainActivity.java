@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Set light theme only
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+        APIHandler api = new APIHandler();
+        api.FetchEverything("bitcoin", "en");
     }
 
     @Override
