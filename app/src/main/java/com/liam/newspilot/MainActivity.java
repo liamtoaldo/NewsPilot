@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,10 +16,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import me.ibrahimsn.lib.OnItemSelectedListener;
+import me.ibrahimsn.lib.SmoothBottomBar;
+
+public class MainActivity extends AppCompatActivity implements OnItemSelectedListener {
 
     Toolbar appbar;
     public String language;
+    SmoothBottomBar bottomBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
         appbar = findViewById(R.id.appbar_included);
         setSupportActionBar(appbar);
         appbar.inflateMenu(R.menu.menu);
+        bottomBar = findViewById(R.id.bottomBar);
+        bottomBar.setOnItemSelectedListener(this);
 
         //Set light theme only
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         //load default language saving to shared preferences
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -40,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         APIHandler api = new APIHandler();
         api.FetchEverything("bitcoin", language);
 
+        // Set the initial fragment
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new FragmentOne()).commit();
     }
 
     @Override
@@ -71,10 +80,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.options) {
-            Intent options = new Intent(MainActivity.this, OptionsActivity.class);
-            startActivity(options);
-            overridePendingTransition(R.transition.slide_up_down, R.transition.slide_up_down);
+            //TODO decide if to destroy or keep
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public boolean onItemSelect(int i) {
+        Fragment selectedFragment = null;
+
+        switch (i) {
+            //home
+            case 0:
+                selectedFragment = new FragmentOne();
+                break;
+            //settings
+            case 1:
+                selectedFragment = new FragmentTwo();
+                break;
+        }
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+        return true;
+    }
+
 }
