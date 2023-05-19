@@ -1,5 +1,9 @@
 package com.liam.newspilot;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.os.Bundle;
 import android.util.ArraySet;
 import android.view.LayoutInflater;
@@ -8,18 +12,22 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.transition.ChangeBounds;
+import androidx.transition.TransitionManager;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class FragmentTwo extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ProgressBar loadingSpinner;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +38,7 @@ public class FragmentTwo extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_two, container, false);
 
+        loadingSpinner = view.findViewById(R.id.loading_spinner_fav);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout_fav);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             // Perform the desired action here
@@ -81,6 +90,29 @@ public class FragmentTwo extends Fragment {
                     //TODO remove with proper id
                     currentFavourites.remove(v.getTag().toString());
                     MainActivity.sharedPrefSet.putStringSet("favourites", currentFavourites);
+
+                    // Animation when deleting favourite
+                    TransitionManager.beginDelayedTransition(cardContainer, new ChangeBounds());
+                    // Get the parent of the parent of the parent and remove it from the card container (linear layout)
+                    View parent = (View)v.getParent().getParent().getParent();
+
+                    // Create the "explode" animation
+                    PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat("scaleX", 1f, 0f);
+                    PropertyValuesHolder scaleY = PropertyValuesHolder.ofFloat("scaleY", 1f, 0f);
+                    PropertyValuesHolder alpha = PropertyValuesHolder.ofFloat("alpha", 1f, 0f);
+                    ObjectAnimator explodeAnimator = ObjectAnimator.ofPropertyValuesHolder(parent, scaleX, scaleY, alpha);
+                    explodeAnimator.setDuration(400);
+
+                    // Remove the parent view from the cardContainer once the animation is complete
+                    explodeAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            cardContainer.removeView(parent);
+                        }
+                    });
+
+                    // Start the animation
+                    explodeAnimator.start();
                 }
                 MainActivity.sharedPrefSet.apply();
             });
@@ -88,6 +120,8 @@ public class FragmentTwo extends Fragment {
             heartButton.setSelected(true);
             cardContainer.addView(cardView);
         }
+        //hide the loading spinner
+        loadingSpinner.setVisibility(View.GONE);
     }
 
 }
