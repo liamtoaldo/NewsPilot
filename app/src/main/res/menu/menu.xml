@@ -8,10 +8,4 @@
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
     />
-    <!-- TODO create more options -->
-    <item
-        android:title="Options"
-        android:icon="@drawable/ic_more"
-        android:id="@+id/options"
-        app:showAsAction="never"/>
 </menu>

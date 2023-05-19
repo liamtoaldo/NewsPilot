@@ -8,19 +8,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
 import me.ibrahimsn.lib.SmoothBottomBar;
 
 public class MainActivity extends AppCompatActivity implements OnItemSelectedListener {
 
+    public static SharedPreferences sharedPrefGet;
+    public static SharedPreferences.Editor sharedPrefSet;
     Toolbar appbar;
     public String language;
     SmoothBottomBar bottomBar;
@@ -41,9 +41,11 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         //load default language saving to shared preferences
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        language = sharedPref.getString(getString(R.string.language), "it");
+        sharedPrefGet = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPrefSet = sharedPrefGet.edit();
+        language = sharedPrefGet.getString(getString(R.string.language), "it");
 
+        //TODO remove
         APIHandler api = new APIHandler();
         api.FetchEverything("bitcoin", language);
 
@@ -77,26 +79,22 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.options) {
-            //TODO decide if to destroy or keep
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
+    //Function that executes when we select a different item on the bottom nav bar
     @Override
     public boolean onItemSelect(int i) {
         Fragment selectedFragment = null;
-
         switch (i) {
             //home
             case 0:
                 selectedFragment = new FragmentOne();
                 break;
-            //settings
+            //favorite
             case 1:
                 selectedFragment = new FragmentTwo();
+                break;
+            //settings
+            case 2:
+                selectedFragment = new FragmentThree();
                 break;
         }
 
