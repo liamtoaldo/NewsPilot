@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.NewsPilot" parent="Theme.AppCompat.Light">
         <!-- Primary brand color. -->
@@ -14,5 +14,9 @@
         <!-- Customize your theme here. -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+    <style name="AppCompatSpinnerItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceListItem</item>
     </style>
 </resources>

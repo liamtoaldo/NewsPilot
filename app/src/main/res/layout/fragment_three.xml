@@ -1,19 +1,42 @@
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipeRefreshLayout"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ScrollView xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:background="@color/black3"
+    tools:ignore="SpeakableTextPresentCheck">
+
+    <LinearLayout
+        android:id="@+id/card_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/black3"
-        tools:ignore="SpeakableTextPresentCheck">
+        android:orientation="vertical" >
 
         <LinearLayout
-            android:id="@+id/card_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/black3"
-            android:orientation="vertical" />
-    </ScrollView>
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:gravity="start"
+                android:layout_weight="1"
+                android:text="Language"
+                android:textColor="@color/white2"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/dropdown_menu"
+                android:paddingTop="7dp"
+                android:layout_width="211dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white2" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
