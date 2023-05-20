@@ -4,14 +4,11 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -24,6 +21,8 @@ import java.util.Arrays;
 
 public class FragmentThree extends Fragment implements AdapterView.OnItemSelectedListener  {
     private final String[] languages = {"🇦🇪 Arabic", "🇩🇪 German", "🇬🇧 English", "🇪🇸 Spanish", "🇫🇷 French", "🇮🇱 Hebrew", "🇮🇹 Italian", "🇳🇱 Dutch", "🇳🇴 Norwegian", "🇵🇹 Portuguese", "🇷🇺 Russian", "🇸🇪 Swedish", "🇵🇰 Urdu", "🇨🇳 Chinese"};
+    //TODO fill these
+    private final String[] countries = {};
     private final String[] options = {"ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt", "ru", "sv", "ud", "zh"};
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,7 +35,7 @@ public class FragmentThree extends Fragment implements AdapterView.OnItemSelecte
         View view = inflater.inflate(R.layout.fragment_three, container, false);
 
         // Create the menu with all the options for the language
-        Spinner spinner = view.findViewById(R.id.dropdown_menu);
+        Spinner spinner = view.findViewById(R.id.lang_menu);
         //TODO add icons or replace with proper text (e.g: Italian)
         CustomSpinnerAdapter customSpinnerAdapter = new CustomSpinnerAdapter(view.getContext(), languages);
         spinner.setAdapter(customSpinnerAdapter);

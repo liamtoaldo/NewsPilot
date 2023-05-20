@@ -48,7 +48,16 @@ public class APIHandler {
         }
     }
 
-    public void FetchTopHeadlines() {
-        //TODO
+    /** Fetch from 'breaking news' in the NewsAPI
+     * @param query the given query, it's necessary
+     * @param country short name code, like 'it', 'en'
+     */
+    public void FetchTopHeadlines(String query, String country) {
+        try {
+            URL url = new URL("https://newsapi.org/v2/top-headlines?q=" + query + "&country=" + country + "&apiKey=" + APIKey);
+            apiWrapper.execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

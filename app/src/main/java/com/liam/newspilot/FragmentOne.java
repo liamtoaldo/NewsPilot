@@ -59,7 +59,7 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        apiHandler.FetchEverything("Trump", MainActivity.sharedPrefGet.getString("language", "it"));
+        apiHandler.FetchEverything("supra", MainActivity.sharedPrefGet.getString("language", "it"));
     }
 
 
