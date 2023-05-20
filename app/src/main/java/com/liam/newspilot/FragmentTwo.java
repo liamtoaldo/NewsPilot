@@ -59,10 +59,11 @@ public class FragmentTwo extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         // Get the favourite news saved in the device
+        //TODO they must be saved inside here in some way (maybe write deserialization and serialization of class to string)
         Set<String> favouriteIds = MainActivity.sharedPrefGet.getStringSet("favourites", new HashSet<>());
 
         for (int i = 0; i < favouriteIds.size(); i++) {
-            //TODO instantiate with proper images and texts once we have the api working
+
             View cardView = inflater.inflate(R.layout.card_item, cardContainer, false);
 
             ImageView image = cardView.findViewById(R.id.image);
@@ -74,7 +75,7 @@ public class FragmentTwo extends Fragment {
             heartButton.setTag(22);
 
             // Set image, title, and description based on the data
-            // image.setImageResource(...);
+//            image.setImageResource(...);
             title.setText("Title " + i);
             description.setText("Description " + i);
 

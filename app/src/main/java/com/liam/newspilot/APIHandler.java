@@ -1,6 +1,8 @@
 package com.liam.newspilot;
 
 
+import android.content.Context;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -11,8 +13,8 @@ import java.util.ArrayList;
 public class APIHandler {
     private final String APIKey = "3dfc1d849ff54868885b2421f9809351";
     private final APIWrapper apiWrapper;
-    public APIHandler() {
-        apiWrapper = new APIWrapper();
+    public APIHandler(APIWrapperCallback callback ) {
+        apiWrapper = new APIWrapper(callback);
     }
 
     /** Fetch from 'everything' in the NewsAPI

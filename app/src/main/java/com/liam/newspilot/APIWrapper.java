@@ -1,5 +1,6 @@
 package com.liam.newspilot;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
@@ -25,6 +26,11 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 
 public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
+    private final APIWrapperCallback callback;
+    public APIWrapper(APIWrapperCallback callback) {
+        this.callback = callback;
+    }
+
     /**
      * @param urls the url to get the search
      * @return the list of articles gotten from the search
@@ -33,7 +39,7 @@ public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
     @Override
     protected ArrayList<Article> doInBackground(URL... urls) {
         Result result;
-        String jsonResult = "";
+        String jsonResult;
 
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) urls[0].openConnection();
@@ -74,6 +80,10 @@ public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
     protected void onPostExecute(ArrayList<Article> articles) {
         super.onPostExecute(articles);
         //TODO create cardviews with articles list
+        if (articles != null) {
+            // Pass the articles to a method in FragmentOne to create cardviews
+            callback.onAPIWrapperPostExecute(articles);
+        }
     }
 
     /** Convert an inputStream to a String

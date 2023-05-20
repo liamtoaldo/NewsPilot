@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -19,8 +20,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-public class FragmentThree extends Fragment {
+import java.util.Arrays;
 
+public class FragmentThree extends Fragment implements AdapterView.OnItemSelectedListener  {
+    private final String[] languages = {"🇦🇪 Arabic", "🇩🇪 German", "🇬🇧 English", "🇪🇸 Spanish", "🇫🇷 French", "🇮🇱 Hebrew", "🇮🇹 Italian", "🇳🇱 Dutch", "🇳🇴 Norwegian", "🇵🇹 Portuguese", "🇷🇺 Russian", "🇸🇪 Swedish", "🇵🇰 Urdu", "🇨🇳 Chinese"};
+    private final String[] options = {"ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt", "ru", "sv", "ud", "zh"};
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,14 +38,18 @@ public class FragmentThree extends Fragment {
         // Create the menu with all the options for the language
         Spinner spinner = view.findViewById(R.id.dropdown_menu);
         //TODO add icons or replace with proper text (e.g: Italian)
-        String[] options = {"ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt", "ru", "sv", "ud", "zh"};
-        CustomSpinnerAdapter customSpinnerAdapter = new CustomSpinnerAdapter(view.getContext(), options);
+        CustomSpinnerAdapter customSpinnerAdapter = new CustomSpinnerAdapter(view.getContext(), languages);
         spinner.setAdapter(customSpinnerAdapter);
+        spinner.setOnItemSelectedListener(this);
 
         // Change color of the dropdown icon
         Drawable spinnerDrawable = spinner.getBackground().getConstantState().newDrawable();
         spinnerDrawable.setColorFilter(ContextCompat.getColor(view.getContext(), R.color.white2), PorterDuff.Mode.SRC_ATOP);
         spinner.setBackground(spinnerDrawable);
+
+        //Load the language
+        String savedlang = MainActivity.sharedPrefGet.getString("language", "it");
+        spinner.setSelection(Arrays.asList(options).indexOf(savedlang));
 
         return view;
     }
@@ -51,7 +59,18 @@ public class FragmentThree extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    // Class for handling the dropdown items
+    // Function that gets executed when a language is selected
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        MainActivity.sharedPrefSet.putString("language", options[position]);
+        MainActivity.sharedPrefSet.apply();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
+    // Class for inflating the dropdown items
     public static class CustomSpinnerAdapter extends ArrayAdapter<String> {
 
         public CustomSpinnerAdapter(Context context, String[] items) {
@@ -59,7 +78,7 @@ public class FragmentThree extends Fragment {
         }
 
         @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.dropdown_item, parent, false);
             }

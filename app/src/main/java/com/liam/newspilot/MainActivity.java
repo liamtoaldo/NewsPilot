@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         language = sharedPrefGet.getString(getString(R.string.language), "it");
 
         //TODO remove
-        APIHandler api = new APIHandler();
-        api.FetchEverything("bitcoin", language);
+//        APIHandler api = new APIHandler(this);
+//        api.FetchEverything("bitcoin", language);
 
         // Set the initial fragment
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new FragmentOne()).commit();
