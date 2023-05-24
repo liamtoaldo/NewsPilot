@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
 import me.ibrahimsn.lib.SmoothBottomBar;
@@ -22,7 +24,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
     public static SharedPreferences sharedPrefGet;
     public static SharedPreferences.Editor sharedPrefSet;
     Toolbar appbar;
-    public String language;
     SmoothBottomBar bottomBar;
 
     @Override
@@ -43,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         //load default language saving to shared preferences
         sharedPrefGet = this.getPreferences(Context.MODE_PRIVATE);
         sharedPrefSet = sharedPrefGet.edit();
-        language = sharedPrefGet.getString(getString(R.string.language), "it");
 
         //TODO remove
 //        APIHandler api = new APIHandler(this);
@@ -75,6 +75,39 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         menu.findItem(R.id.search).setOnActionExpandListener(onActionExpandListener);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setQueryHint("Search topic...");
+
+        // Set the query text listener
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                String language = sharedPrefGet.getString(getString(R.string.language), "en");
+
+                // Handle the submit button here
+                FragmentOne currentFragment = (FragmentOne)getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                if (currentFragment != null) {
+                    // Call the FetchEverything method of APIHandler to fetch news articles based on the query
+                    APIHandler api = new APIHandler(currentFragment);
+                    api.FetchEverything(query, language);
+                    currentFragment.loadingSpinner.setVisibility(View.VISIBLE);
+                    currentFragment.cardContainer.setVisibility(View.GONE);
+                }
+
+                //Hide the keyboard
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                View currentFocusedView = getCurrentFocus();
+                if (currentFocusedView != null) {
+                    inputMethodManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Handle the text change here
+                // For example, update the search suggestions based on the new text
+                return false;
+            }
+        });
 
         return true;
     }

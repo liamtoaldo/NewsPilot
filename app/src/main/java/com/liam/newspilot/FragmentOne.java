@@ -1,7 +1,6 @@
 package com.liam.newspilot;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FragmentOne extends Fragment implements APIWrapperCallback {
+    public LinearLayout cardContainer;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ProgressBar loadingSpinner;
+    public ProgressBar loadingSpinner;
     private APIHandler apiHandler;
     private View view;
 
@@ -43,13 +43,14 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         loadingSpinner = view.findViewById(R.id.loading_spinner);
+        cardContainer = view.findViewById(R.id.card_container);
 
+        //TODO make this work based on the last query provided
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            // Perform the desired action here
-            //TODO api call
+            cardContainer.setVisibility(View.GONE);
+            loadingSpinner.setVisibility(View.VISIBLE);
+            apiHandler.FetchTopHeadlines(MainActivity.sharedPrefGet.getString("country", "us"));
 
-            // Hide the spinner
-            swipeRefreshLayout.setRefreshing(false);
         });
 
         return view;
@@ -59,20 +60,25 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        apiHandler.FetchEverything("supra", MainActivity.sharedPrefGet.getString("language", "it"));
+        //first query
+        apiHandler.FetchTopHeadlines(MainActivity.sharedPrefGet.getString("country", "us"));
     }
 
 
     @Override
     public void onAPIWrapperPostExecute(ArrayList<Article> articles) {
         updateCardViews(articles);
+        // Hide the spinner
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     //Method to instantiate the cards with the respective articles
     private void updateCardViews(ArrayList<Article> articles) {
 
-        LinearLayout cardContainer = view.findViewById(R.id.card_container);
         LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        // Remove all current card views
+        cardContainer.removeAllViews();
 
         for (int i = 0; i < articles.size(); i++) {
             Article article = articles.get(i);
@@ -117,6 +123,8 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
         }
         //hide the loading spinner
         loadingSpinner.setVisibility(View.GONE);
+        //show the card container
+        cardContainer.setVisibility(View.VISIBLE);
     }
 
 }
