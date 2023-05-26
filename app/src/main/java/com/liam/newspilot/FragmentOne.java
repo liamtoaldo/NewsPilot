@@ -1,5 +1,6 @@
 package com.liam.newspilot;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class FragmentOne extends Fragment implements APIWrapperCallback {
@@ -27,6 +31,7 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
     public ProgressBar loadingSpinner;
     private APIHandler apiHandler;
     private View view;
+    private final Gson gson = new Gson();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,12 +50,14 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
         loadingSpinner = view.findViewById(R.id.loading_spinner);
         cardContainer = view.findViewById(R.id.card_container);
 
-        //TODO make this work based on the last query provided
         swipeRefreshLayout.setOnRefreshListener(() -> {
             cardContainer.setVisibility(View.GONE);
             loadingSpinner.setVisibility(View.VISIBLE);
-            apiHandler.FetchTopHeadlines(MainActivity.sharedPrefGet.getString("country", "us"));
-
+            if(!MainActivity.lastQuery.equals("")) {
+                apiHandler.FetchEverything(MainActivity.lastQuery, MainActivity.sharedPrefGet.getString("language", "en"));
+            } else {
+                apiHandler.FetchTopHeadlines(MainActivity.sharedPrefGet.getString("country", "us"));
+            }
         });
 
         return view;
@@ -83,16 +90,23 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
         for (int i = 0; i < articles.size(); i++) {
             Article article = articles.get(i);
 
-            //TODO instantiate with proper images and texts once we have the api working
             View cardView = inflater.inflate(R.layout.card_item, cardContainer, false);
+            cardView.setOnClickListener(v -> {
+                FragmentWebView fragmentWebView = new FragmentWebView();
+                Bundle bundle = new Bundle();
+                bundle.putString("url", article.url);
+                fragmentWebView.setArguments(bundle);
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragmentWebView)
+                        .addToBackStack(null)
+                        .commit();
+            });
 
             ImageView image = cardView.findViewById(R.id.image);
             TextView title = cardView.findViewById(R.id.title);
             TextView description = cardView.findViewById(R.id.description);
             ImageButton heartButton = cardView.findViewById(R.id.heart_button);
-            //TODO set tag with proper id (THERE IS NO ID IN THE NEWS!!!)
-            cardView.setTag(22);
-            heartButton.setTag(22);
 
             // Set image, title, and description based on the data
             Glide.with(view.getContext())
@@ -107,14 +121,21 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
             // What happens when the hearth in the card item is clicked
             heartButton.setOnClickListener(v -> {
                 v.setSelected(!v.isSelected());
-                Set<String> currentFavourites = new HashSet<>(MainActivity.sharedPrefGet.getStringSet("favourites", new HashSet<>()));
-                if(v.isSelected()) {
-                    //TODO add with proper id
-                    currentFavourites.add(v.getTag().toString());
+                Set<String> currentFavourites = new LinkedHashSet<>(MainActivity.sharedPrefGet.getStringSet("favourites", new LinkedHashSet<>()));
+
+                //Add datetime of saving for better order in the favourites page
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    article.savedDateTime = System.currentTimeMillis();
+                }
+
+                // Save as json to shared preferences
+                String articleJsonToSave = gson.toJson(article);
+
+                if(v.isSelected() && !articleExists(currentFavourites, article)) {
+                    currentFavourites.add(articleJsonToSave);
                     MainActivity.sharedPrefSet.putStringSet("favourites", currentFavourites);
-                } else {
-                    //TODO remove with proper id
-                    currentFavourites.remove(v.getTag().toString());
+                } else if(!v.isSelected()){
+                    currentFavourites.remove(articleJsonToSave);
                     MainActivity.sharedPrefSet.putStringSet("favourites", currentFavourites);
                 }
                 MainActivity.sharedPrefSet.apply();
@@ -127,4 +148,15 @@ public class FragmentOne extends Fragment implements APIWrapperCallback {
         cardContainer.setVisibility(View.VISIBLE);
     }
 
+    private boolean articleExists(Set<String> favourites, Article article) {
+        boolean res = false;
+        for (String json : favourites) {
+            Article existingArticle = gson.fromJson(json, Article.class);
+            if (existingArticle.equals(article)) {
+                res = true;
+                break;
+            }
+        }
+        return res;
+    }
 }

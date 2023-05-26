@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +23,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.ChangeBounds;
 import androidx.transition.TransitionManager;
 
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class FragmentTwo extends Fragment {
@@ -41,8 +50,7 @@ public class FragmentTwo extends Fragment {
         loadingSpinner = view.findViewById(R.id.loading_spinner_fav);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout_fav);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            // Perform the desired action here
-            //TODO api call
+            //TODO
 
             // Hide the spinner
             swipeRefreshLayout.setRefreshing(false);
@@ -59,43 +67,57 @@ public class FragmentTwo extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         // Get the favourite news saved in the device
-        //TODO they must be saved inside here in some way (maybe write deserialization and serialization of class to string)
-        Set<String> favouriteIds = MainActivity.sharedPrefGet.getStringSet("favourites", new HashSet<>());
+        Set<String> favourites = MainActivity.sharedPrefGet.getStringSet("favourites", new LinkedHashSet<>());
 
-        for (int i = 0; i < favouriteIds.size(); i++) {
+        //Treat the hashset as an array, so that we can keep the order.
+        ArrayList<Article> articles = new ArrayList<>();
+        //Gson deserializer
+        Gson gson = new Gson();
 
+        for(String json: favourites) {
+            //Deserialize the object
+            Article article;
+            try {
+                article = gson.fromJson(json, Article.class);
+                articles.add(article);
+            } catch (Exception e) {
+                Toast.makeText(view.getContext(), "Error deserializing a news: " + e, Toast.LENGTH_SHORT).show();
+            }
+        }
+        Comparator<Article> comparator = (a, b) -> Long.compare(b.savedDateTime, a.savedDateTime);
+        articles.sort(comparator);
+        for (Article article: articles) {
             View cardView = inflater.inflate(R.layout.card_item, cardContainer, false);
 
             ImageView image = cardView.findViewById(R.id.image);
             TextView title = cardView.findViewById(R.id.title);
             TextView description = cardView.findViewById(R.id.description);
             ImageButton heartButton = cardView.findViewById(R.id.heart_button);
-            //TODO set tag with proper id
-            cardView.setTag(22);
-            heartButton.setTag(22);
 
             // Set image, title, and description based on the data
-//            image.setImageResource(...);
-            title.setText("Title " + i);
-            description.setText("Description " + i);
+            Glide.with(view.getContext())
+                    .load(article.urlToImage)
+                    .placeholder(R.drawable.loading) // Optional: Show a placeholder image while the actual image is loading
+                    .error(R.drawable.error_image) // Optional: Show an error image if the image fails to load
+                    .into(image);
 
-            // What happens when the hearth in the card item is clicked
+            title.setText(article.title);
+            description.setText(article.description);
+
+            // What happens when the heart in the card item is clicked
             heartButton.setOnClickListener(v -> {
                 v.setSelected(!v.isSelected());
-                Set<String> currentFavourites = new HashSet<>(favouriteIds);
-                if(v.isSelected()) {
-                    //TODO add with proper id
-                    currentFavourites.add(v.getTag().toString());
-                    MainActivity.sharedPrefSet.putStringSet("favourites", currentFavourites);
-                } else {
-                    //TODO remove with proper id
-                    currentFavourites.remove(v.getTag().toString());
+                Set<String> currentFavourites = new LinkedHashSet<>(favourites);
+
+                if (!v.isSelected()) {
+                    //Remove the item from the favourites saved set
+                    currentFavourites.remove(gson.toJson(article));
                     MainActivity.sharedPrefSet.putStringSet("favourites", currentFavourites);
 
                     // Animation when deleting favourite
                     TransitionManager.beginDelayedTransition(cardContainer, new ChangeBounds());
                     // Get the parent of the parent of the parent and remove it from the card container (linear layout)
-                    View parent = (View)v.getParent().getParent().getParent();
+                    View parent = (View) v.getParent().getParent().getParent();
 
                     // Create the "explode" animation
                     PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat("scaleX", 1f, 0f);

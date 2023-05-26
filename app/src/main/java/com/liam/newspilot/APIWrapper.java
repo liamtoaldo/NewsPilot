@@ -73,13 +73,11 @@ public class APIWrapper extends AsyncTask<URL, Void, ArrayList<Article>> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        //TODO create loading spinner
     }
 
     @Override
     protected void onPostExecute(ArrayList<Article> articles) {
         super.onPostExecute(articles);
-        //TODO create cardviews with articles list
         if (articles != null) {
             // Pass the articles to a method in FragmentOne to create cardviews
             callback.onAPIWrapperPostExecute(articles);

@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
 
     public static SharedPreferences sharedPrefGet;
     public static SharedPreferences.Editor sharedPrefSet;
+    public static String lastQuery = "";
     Toolbar appbar;
     SmoothBottomBar bottomBar;
 
@@ -45,10 +46,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         sharedPrefGet = this.getPreferences(Context.MODE_PRIVATE);
         sharedPrefSet = sharedPrefGet.edit();
 
-        //TODO remove
-//        APIHandler api = new APIHandler(this);
-//        api.FetchEverything("bitcoin", language);
-
         // Set the initial fragment
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new FragmentOne()).commit();
     }
@@ -68,50 +65,67 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
+                //Reset the query
+                lastQuery = "";
                 return true;
             }
         };
 
-        menu.findItem(R.id.search).setOnActionExpandListener(onActionExpandListener);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setQueryHint("Search topic...");
+            menu.findItem(R.id.search).setOnActionExpandListener(onActionExpandListener);
+            SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+            searchView.setQueryHint("Search topic...");
 
-        // Set the query text listener
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                String language = sharedPrefGet.getString(getString(R.string.language), "en");
+            // Set the query text listener
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    if(query.equals("")) {
+                        return false;
+                    }
+                    lastQuery = query;
+                    String language = sharedPrefGet.getString(getString(R.string.language), "en");
 
-                // Handle the submit button here
-                FragmentOne currentFragment = (FragmentOne)getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-                if (currentFragment != null) {
-                    // Call the FetchEverything method of APIHandler to fetch news articles based on the query
-                    APIHandler api = new APIHandler(currentFragment);
-                    api.FetchEverything(query, language);
-                    currentFragment.loadingSpinner.setVisibility(View.VISIBLE);
-                    currentFragment.cardContainer.setVisibility(View.GONE);
+                    // Handle the submit button here
+                    FragmentOne currentFragment = (FragmentOne) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                    if (currentFragment != null) {
+                        // Call the FetchEverything method of APIHandler to fetch news articles based on the query
+                        APIHandler api = new APIHandler(currentFragment);
+                        api.FetchEverything(query, language);
+                        currentFragment.loadingSpinner.setVisibility(View.VISIBLE);
+                        currentFragment.cardContainer.setVisibility(View.GONE);
+                    }
+
+                    //Hide the keyboard
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    View currentFocusedView = getCurrentFocus();
+                    if (currentFocusedView != null) {
+                        inputMethodManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
+                    return true;
                 }
 
-                //Hide the keyboard
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                View currentFocusedView = getCurrentFocus();
-                if (currentFocusedView != null) {
-                    inputMethodManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    // Handle the text change here
+                    // For example, update the search suggestions based on the new text
+                    return false;
                 }
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // Handle the text change here
-                // For example, update the search suggestions based on the new text
-                return false;
-            }
-        });
+            });
 
         return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        //Hide search menu if it's not fragment one (home)
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (currentFragment instanceof FragmentOne) {
+            menu.findItem(R.id.search).setVisible(true);
+        } else {
+            menu.findItem(R.id.search).setVisible(false);
+        }
+        return true;
+    }
     //Function that executes when we select a different item on the bottom nav bar
     @Override
     public boolean onItemSelect(int i) {
@@ -131,7 +145,8 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
                 break;
         }
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commitNow();
+        invalidateOptionsMenu();
         return true;
     }
 
