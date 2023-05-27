@@ -88,6 +88,17 @@ public class FragmentTwo extends Fragment {
         articles.sort(comparator);
         for (Article article: articles) {
             View cardView = inflater.inflate(R.layout.card_item, cardContainer, false);
+            cardView.setOnClickListener(v -> {
+                FragmentWebView fragmentWebView = new FragmentWebView();
+                Bundle bundle = new Bundle();
+                bundle.putString("url", article.url);
+                fragmentWebView.setArguments(bundle);
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragmentWebView)
+                        .addToBackStack(null)
+                        .commit();
+            });
 
             ImageView image = cardView.findViewById(R.id.image);
             TextView title = cardView.findViewById(R.id.title);
