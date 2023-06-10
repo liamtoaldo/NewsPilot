@@ -89,6 +89,7 @@ NewsPilot is distributed under the MIT License. See [LICENSE](https://github.com
 ## Contact
 
 Me - [liamtoaldo+gh@gmail.com](mailto:liamtoaldo+gh@gmail.com)
+</br>
 Project Link: [https://github.com/liamtoaldo/NewsPilot](https://github.com/liamtoaldo/NewsPilot)
 
 <!-- ACKNOWLEDGEMENTS -->
